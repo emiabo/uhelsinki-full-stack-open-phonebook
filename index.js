@@ -1,7 +1,9 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
+app.use(morgan('tiny'))
 
 let persons = [
     { 
@@ -66,14 +68,12 @@ app.post('/api/persons', (req, res) => {
     }
 
     persons = persons.concat(person)
-    console.log(persons)
     res.json(person)
 })
 
 app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
     persons = persons.filter(person => person.id !== id)
-    console.log(persons)
     res.status(204).end()
 })
 
