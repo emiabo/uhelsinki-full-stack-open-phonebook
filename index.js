@@ -6,10 +6,21 @@ require('dotenv').config()
 
 const Person = require('./models/person')
 
+const errorHandler = (error, req, res, next) => {
+    console.error(error.message)
+    // If ID was sent in an unrecognized format to an ID-specific handler (get, delete, or put)
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'bad ID' })
+    }
+
+    next(error)
+}
+
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.use(morgan('tiny'))
+app.use(errorHandler)
 
 let people = [
 ]
@@ -21,14 +32,15 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    Person.findById(request.params.id).then(person => {
-        if (person) {
-            res.json(person)
-        } else {
-            res.status(404).end()
-        }
-    })
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                res.json(person)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => next(error))
 })
 
 app.post('/api/persons', (req, res) => {
@@ -55,9 +67,11 @@ app.post('/api/persons', (req, res) => {
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    people = people.filter(person => person.id !== id)
-    res.status(204).end()
+    Person.findByIdAndRemove(req.params.id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
@@ -68,5 +82,5 @@ app.get('/info', (req, res) => {
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-    console.log(`Server live on port ${PORT}`)
+    console.log(`Server live on port ${PORT}. http://localhost:3001/`)
 })
