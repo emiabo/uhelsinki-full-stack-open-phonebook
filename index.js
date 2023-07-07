@@ -74,6 +74,15 @@ app.delete('/api/persons/:id', (req, res) => {
         .catch(error => next(error))
 })
 
+app.put('/api/persons/:id', (req, res) => {
+    Person.findByIdAndUpdate(req.params.id, { number: req.params.number })
+        .then(result => {
+            console.log(result)
+            res.json(result)
+        })
+        .catch(error => next(error))
+})
+
 app.get('/info', (req, res) => {
     Person.find({}).then(people => {
         res.send(`<p>Phonebook has info for ${people.length} people</p><p>${new Date()}</p>`)
